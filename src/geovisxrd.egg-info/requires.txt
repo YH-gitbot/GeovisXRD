@@ -1,0 +1,11 @@
+numpy
+pandas
+tqdm
+scipy
+shap
+joblib
+xgboost<3.0.0
+scikit-learn
+lightgbm
+matplotlib
+statsmodels

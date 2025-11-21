@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: geovisxrd
+Version: 0.2.1
+Summary: GeoVisXRD: An Open-Source Python Library for Geospatial Shapley Value Computation and Visualization
+Author-email: Yuanhan Shu <yuanhan.shu@tum.de>
+License: MIT
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: tqdm
+Requires-Dist: scipy
+Requires-Dist: shap
+Requires-Dist: joblib
+Requires-Dist: xgboost<3.0.0
+Requires-Dist: scikit-learn
+Requires-Dist: lightgbm
+Requires-Dist: matplotlib
+Requires-Dist: statsmodels
+Dynamic: license-file
