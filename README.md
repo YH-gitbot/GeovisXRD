@@ -1,0 +1,124 @@
+````markdown
+# GeoVisXRD
+
+**GeoVisXRD** is a Python toolkit for **Spatial Causal Inference**, **Uncertainty Estimation**, and **Dual-Layer Machine Learning**.
+
+It integrates **XGBoost** modeling, **SHAP** explainability, Causal Discovery (SAM/PC/NOTEARS), and Spatial Segmentation (SAM/Threshold) into a unified framework.
+
+---
+
+## 📦 Installation
+
+You can install the package directly from GitHub:
+
+```bash
+# Option 1: Using HTTPS (Recommended for most users)
+pip install git+[https://github.com/YH-gitbot/GeovisXRD.git](https://github.com/YH-gitbot/GeovisXRD.git)
+
+# Option 2: Using SSH (If you have configured SSH keys)
+pip install git+ssh://git@github.com/YH-gitbot/GeovisXRD.git
+````
+
+-----
+
+## 🍎 Important Note for macOS Users
+
+If you encounter the following error when running XGBoost:
+
+> **`XGBoost Library (libxgboost.dylib) could not be loaded`**
+> or
+> **`Library not loaded: @rpath/libomp.dylib`**
+
+This is because macOS lacks the **OpenMP** runtime required by XGBoost. You must install it manually.
+
+### Solution (Choose one):
+
+**Method 1: Using Conda (Recommended)**
+If you are using a Conda environment, run:
+
+```bash
+conda install libomp
+```
+
+**Method 2: Using Homebrew**
+If you use system Python or venv, run:
+
+```bash
+brew install libomp
+```
+
+*After installing `libomp`, the package should work correctly.*
+
+-----
+
+## 🚀 Quick Usage
+
+### 1\. Causal Structure Discovery
+
+Switch between algorithms (SAM, PC, NOTEARS, LiNGAM) easily.
+
+```python
+import geovisxrd
+
+# Initialize the model (e.g., SAM, PC, or Threshold)
+model = geovisxrd.get_causal_model("sam", lr=0.01)
+
+# Fit data
+model.fit(df)
+
+# Get the causal graph (NetworkX object)
+nx_graph = model.get_nx_graph()
+
+# Plot
+geovisxrd.plot_causal_graph_networkx(nx_graph, threshold=0.5)
+```
+
+### 2\. Uncertainty Estimation
+
+Train a second layer model to predict the residuals (errors) of the primary model.
+
+```python
+# 1. Train primary model
+model, metrics = geovisxrd.train_model(model_name="xgboost", X=X, y=y)
+
+# 2. Calculate residuals (The target for uncertainty model)
+residuals = (y - model.predict(X)).abs()
+
+# 3. Train uncertainty model
+unc_model, unc_metrics = geovisxrd.train_model(
+    model_name="xgboost", 
+    X=X, y=residuals
+)
+```
+
+### 3\. Spatial Segmentation
+
+Identify high-risk regions using Segment Anything Model (SAM) or Thresholding.
+
+```python
+# Use Segment Anything Model (SAM)
+mask = geovisxrd.run_segmentation(
+    shap_map, 
+    method="sam", 
+    checkpoint_path="sam_vit_h.pth"
+)
+
+# Or use simple Threshold
+mask = geovisxrd.run_segmentation(shap_map, method="threshold", threshold=0.8)
+```
+
+-----
+
+## 📋 Requirements
+
+  * Python \>= 3.9
+  * `numpy`, `pandas`, `scipy`
+  * `xgboost`, `scikit-learn`
+  * `shap`, `matplotlib`, `networkx`
+  * `torch` (for SAM/NOTEARS)
+  * `causal-learn`, `lingam`, `cdt` (for Causal Discovery)
+
+<!-- end list -->
+
+```
+```
