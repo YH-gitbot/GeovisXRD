@@ -6,7 +6,13 @@ from lightgbm import LGBMRegressor
 
 def get_model(model_name: str, **params):
     """
-    根据字符串名称返回对应模型实例
+    used to get model instance by name 
+    Args:
+        model_name (str): model name
+        **params: model parameters
+    Returns:
+        model instance      
+        
     """
     model_name = model_name.lower()
 

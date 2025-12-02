@@ -41,7 +41,15 @@ dependencies = [
     "lightgbm",
     "matplotlib",
 
-    "statsmodels"
+    "statsmodels", ## 2D lowess smoothing
+
+    ## causal discovery v0.5.0
+    "networkx",       # Graph structure foundation
+    "torch",          # Deep learning foundation (needed for SAM, NOTEARS)
+    "causal-learn",   # PC algorithm
+    "lingam",         # LiNGAM algorithm
+    "causalnex",      # NOTEARS algorithm
+    "cdt",
 ]
 
 # Python 版本要求

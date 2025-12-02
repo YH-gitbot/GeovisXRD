@@ -22,4 +22,10 @@ Requires-Dist: scikit-learn
 Requires-Dist: lightgbm
 Requires-Dist: matplotlib
 Requires-Dist: statsmodels
+Requires-Dist: networkx
+Requires-Dist: torch
+Requires-Dist: causal-learn
+Requires-Dist: lingam
+Requires-Dist: causalnex
+Requires-Dist: cdt
 Dynamic: license-file

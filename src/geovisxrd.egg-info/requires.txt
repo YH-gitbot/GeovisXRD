@@ -9,3 +9,9 @@ scikit-learn
 lightgbm
 matplotlib
 statsmodels
+networkx
+torch
+causal-learn
+lingam
+causalnex
+cdt
