@@ -1,4 +1,3 @@
-````markdown
 # GeoVisXRD
 
 **GeoVisXRD** is a Python toolkit for **Spatial Causal Inference**, **Uncertainty Estimation**, and **Dual-Layer Machine Learning**.
@@ -17,7 +16,6 @@ pip install git+[https://github.com/YH-gitbot/GeovisXRD.git](https://github.com/
 
 # Option 2: Using SSH (If you have configured SSH keys)
 pip install git+ssh://git@github.com/YH-gitbot/GeovisXRD.git
-````
 
 -----
 
