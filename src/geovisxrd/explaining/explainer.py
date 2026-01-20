@@ -54,7 +54,11 @@ def shapexplainer(model, X, plot_type="summary", save_path=None,batch_size=1000)
         if isinstance(explainer, shap.TreeExplainer):
             batch_shap = explainer.shap_values(batch_X, check_additivity=False)
         else:
-            batch_shap = explainer.shap_values(batch_X)
+            if hasattr(explainer, "shap_values"):
+                batch_shap = explainer.shap_values(batch_X)
+            else:
+                shap_result = explainer(batch_X)
+                batch_shap = shap_result.values
         
         shap_values_list.append(batch_shap)
     

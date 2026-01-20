@@ -284,3 +284,73 @@ def plot_pos_neg_ratio(shap_values, feature_names, save_path=None, color_palette
         plt.close()
         
     return ax
+
+# =========================================================
+# 5. causal plotting utils
+# =========================================================
+import networkx as nx
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import os
+
+def plot_causal_graph_networkx(nx_graph, threshold=0.0, title="Causal Graph", 
+                               save_path=None, show=False):
+    """
+    绘制因果图。
+    新增参数: show (bool) - 是否弹出窗口显示图片。批量运行时建议设为 False。
+    """
+    print(f"🎨 正在绘制因果图 (Threshold={threshold})...")
+    
+    # 1. 过滤弱边
+    filtered_edges = []
+    for u, v, d in nx_graph.edges(data=True):
+        weight = d.get('weight', 0)
+        if abs(weight) >= threshold:
+            filtered_edges.append((u, v, weight))
+    
+    filtered_graph = nx.DiGraph()
+    filtered_graph.add_nodes_from(nx_graph.nodes())
+    filtered_graph.add_weighted_edges_from(filtered_edges)
+
+    # 2. 绘图
+    plt.figure(figsize=(12, 8))
+    pos = nx.spring_layout(filtered_graph, seed=42)
+    
+    nx.draw(
+        filtered_graph, pos, 
+        with_labels=True, 
+        node_size=3000, 
+        node_color='lightblue',
+        font_size=10, 
+        font_weight='bold', 
+        edge_color='gray',
+        arrowsize=20
+    )
+    
+    edge_labels = {(u, v): f"{w:.2f}" for u, v, w in filtered_edges}
+    nx.draw_networkx_edge_labels(
+        filtered_graph, pos, 
+        edge_labels=edge_labels,
+        font_color='red'
+    )
+
+    plt.title(f"{title} (Threshold={threshold})")
+    
+    # 3. 保存
+    if save_path:
+        directory = os.path.dirname(save_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+            
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"   - 图片已保存: {save_path}")
+        
+    # 🔥 关键修改在这里！
+    if show:
+        plt.show()  # 阻塞，等待用户关闭
+    else:
+        plt.close() # 不阻塞，直接释放内存，继续跑下一行代码
+    
+    return filtered_edges
+

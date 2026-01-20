@@ -9,6 +9,7 @@ src/geovisxrd.egg-info/SOURCES.txt
 src/geovisxrd.egg-info/dependency_links.txt
 src/geovisxrd.egg-info/requires.txt
 src/geovisxrd.egg-info/top_level.txt
+src/geovisxrd/causal/__init__.py
 src/geovisxrd/causal/discovery.py
 src/geovisxrd/explaining/__init__.py
 src/geovisxrd/explaining/explainer.py
@@ -20,3 +21,5 @@ src/geovisxrd/modeling/save.py
 src/geovisxrd/modeling/trainer.py
 src/geovisxrd/plotting/__init__.py
 src/geovisxrd/plotting/plotting.py
+src/geovisxrd/threshold/__init__.py
+src/geovisxrd/threshold/optimizer.py
