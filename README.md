@@ -1,129 +1,43 @@
+GeoVisXRDGeoVisXRD (Geovisual Explainable AI for Causal Discovery) is a specialized Python framework for Recursive Spatial Causal Inference and Non-linear Driver Analysis.It is designed to bridge the gap between predictive performance and causal mechanism understanding in complex geospatial systems, such as soil organic carbon (SOC) distribution or frozen ground dynamics.
 
----
+🌟 Core FeaturesRecursive ML-Causal Pipeline: Beyond simple $X \rightarrow Y$ modeling, it allows training $X \rightarrow SHAP_{X_i}$ to decipher the factors driving the contribution of key variables.Stability-Optimized Causal Discovery: Implements Jaccard similarity analysis to automatically find the optimal threshold for causal graphs, ensuring structural robustness.Advanced Geospatial Plotting: Custom LOWESS trend curves, 3D interaction plots, and Pos/Neg contribution ratio analysis for scientific publications.One-Click Persistence: Seamlessly save and load models, SHAP values (binary), and causal objects for break-point analysis.
 
-# GeoVisXRD
-
-**GeoVisXRD** is a Python toolkit for **Spatial Causal Inference**, **Uncertainty Estimation**, and **Dual-Layer Machine Learning**.
-
-It integrates **XGBoost** modeling, **SHAP** explainability, Causal Discovery (SAM/PC/NOTEARS), and Spatial Segmentation (SAM/Threshold) into a unified framework.
-
----
-
-## 📦 Installation
-
-You can install the package directly from GitHub:
-
-```bash
-# Option 1: Using HTTPS (Recommended for most users)
+📦 InstallationBash# Recommended installation via GitHub
 pip install git+https://github.com/YH-gitbot/GeovisXRD.git
+Note for macOS users: Ensure libomp is installed via brew install libomp to support XGBoost.
 
-# Option 2: Using SSH (If you have configured SSH keys)
-pip install git+ssh://git@github.com/YH-gitbot/GeovisXRD.git
-```
+🚀 Key Workflows1. Recursive Mechanism Deciphering (The Paper's Logic)Identify the most prominent feature and analyze what drives its influence.Pythonfrom geovisxrd.modeling.trainer import train_model
+from geovisxrd.explaining.io import save_shap_results, load_shap_results
 
----
+# Stage 1: Global Prediction (X -> y)
+model, _ = train_model("xgb", X, y)
+explainer, shap_vals = shapexplainer(model, X)
+save_shap_results(explainer, shap_vals, X, name_prefix="layer1")
 
-## 🍎 Important Note for macOS Users
+# Stage 2: Recursive Analysis (X -> SHAP_of_Best_Feature)
+# Target the SHAP values of 'MedInc' to see what drives its contribution
+new_y = shap_vals[:, X.columns.get_loc("MedInc")]
+recursive_model, _ = train_model("xgb", X, new_y)
+2. Stability-Aware Causal DiscoveryUse Jaccard Index to find the "Elbow Point" where the causal structure becomes stable.Pythonfrom geovisxrd.causal.discovery import get_causal_model
+from geovisxrd.threshold.optimizer import analyze_threshold_stability
 
-If you encounter the following error when running XGBoost:
+# Run Causal Discovery (SAM, PC, LiNGAM, or NOTEARS)
+sam_model = get_causal_model("sam", train_epochs=100)
+sam_model.fit(data)
 
-> **`XGBoost Library (libxgboost.dylib) could not be loaded`**
-> or
-> **`Library not loaded: @rpath/libomp.dylib`**
+# Automatically find the best threshold using Jaccard analysis
+stability_df, best_t = analyze_threshold_stability(sam_model)
 
-This is because macOS lacks the **OpenMP** runtime required by XGBoost.
-You must install it manually.
+# Plot the optimized graph
+geovisxrd.plot_causal_graph_networkx(sam_model.get_nx_graph(), threshold=best_t)
+3. Scientific Visualizations for AnalysisGenerate non-linear response curves and interaction heatmaps.Pythonfrom geovisxrd.plotting.plotting import plot_dependence_2d_lowess, plot_pos_neg_ratio
 
-### Solution (Choose one):
+# Plot LOWESS smoothed response curve to identify thresholds/saturation points
+plot_dependence_2d_lowess(shap_vals, X, x_feature="MedInc", y_feature="MedInc")
 
-**Method 1: Using Conda (Recommended)**
+# Analyze Pos/Neg influence distribution
+plot_pos_neg_ratio(shap_vals, X.columns)
 
-```bash
-conda install libomp
-```
+📁 Data Persistence (Save & Load)GeoVisXRD ensures your research is reproducible. Every stage can be reloaded without recomputing.Data TypeSave MethodLoad MethodML Modelssave_model(model, "xgb")joblib.load(path)SHAP Datasave_shap_results(e, s, X)load_shap_results(path)Causal Graphmodel.save("graph.pkl")pickle.load(open(path, 'rb'))
 
-**Method 2: Using Homebrew**
-
-```bash
-brew install libomp
-```
-
-*After installing `libomp`, the package should work correctly.*
-
----
-
-## 🚀 Quick Usage
-
-### 1. Causal Structure Discovery
-
-Switch between algorithms (SAM, PC, NOTEARS, LiNGAM) easily.
-
-```python
-import geovisxrd
-
-# Initialize the model (e.g., SAM, PC, or Threshold)
-model = geovisxrd.get_causal_model("sam", lr=0.01)
-
-# Fit data
-model.fit(df)
-
-# Get the causal graph (NetworkX object)
-nx_graph = model.get_nx_graph()
-
-# Plot
-geovisxrd.plot_causal_graph_networkx(nx_graph, threshold=0.5)
-```
-
----
-
-### 2. Uncertainty Estimation
-
-Train a second layer model to predict residuals (errors) of the primary model.
-
-```python
-# 1. Train primary model
-model, metrics = geovisxrd.train_model(model_name="xgboost", X=X, y=y)
-
-# 2. Calculate residuals (The target for uncertainty model)
-residuals = (y - model.predict(X)).abs()
-
-# 3. Train uncertainty model
-unc_model, unc_metrics = geovisxrd.train_model(
-    model_name="xgboost",
-    X=X, y=residuals
-)
-```
-
----
-
-### 3. Spatial Segmentation
-
-```python
-# Use Segment Anything Model (SAM)
-mask = geovisxrd.run_segmentation(
-    shap_map,
-    method="sam",
-    checkpoint_path="sam_vit_h.pth"
-)
-
-# Or use simple Thresholding
-mask = geovisxrd.run_segmentation(
-    shap_map,
-    method="threshold",
-    threshold=0.8
-)
-```
-
----
-
-## 📋 Requirements
-
-* Python >= 3.9
-* numpy, pandas, scipy
-* xgboost, scikit-learn
-* shap, matplotlib, networkx
-* torch (for SAM/NOTEARS)
-* causal-learn, lingam, cdt (for Causal Discovery)
-
----
-
+📋 RequirementsPython >= 3.9Core: numpy, pandas, xgboost, scikit-learn, shapCausal: cdt, causal-learn, lingam (Optional, based on algorithm choice)Visualization: matplotlib, networkx, statsmodels📄 CitationIf you use this framework in your research, please cite:Chen, C., et al. (2025). Geovisual explainable AI for understanding frozen ground in Qinghai-Tibet Plateau urban region. International Journal of Applied Earth Observation and Geoinformation.
