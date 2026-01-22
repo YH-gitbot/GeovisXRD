@@ -27,6 +27,8 @@ from .plotting import plot_causal_graph_networkx
 
 from .threshold.optimizer import analyze_threshold_stability, calculate_jaccard_similarity
 
+from .recursive.pipeline import run_recursive_step
+
 __all__ = ["hallo", "train_model", "get_model", "save_model",
            "shapexplainer",
            "save_shap_results", "load_shap_results", 
@@ -34,4 +36,5 @@ __all__ = ["hallo", "train_model", "get_model", "save_model",
            "plot_dependence_2d_lowess", "plot_dependence_3d_interaction",
            "get_causal_model","plot_causal_graph_networkx",
            "analyze_threshold_stability", "calculate_jaccard_similarity",
+            "run_recursive_step"
            ]
