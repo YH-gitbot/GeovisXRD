@@ -7,44 +7,42 @@ import numpy as np
 
 def plot_all_shap_charts(shap_data_dict, save_dir="shap_plots"):
     """
-    一键生成所有常见的 SHAP 图表 (蜂群图, 柱状图, 瀑布图)。
+    Generate all common SHAP charts in one go (swarm plot, bar plot, waterfall plot).
     
-    参数:
-    shap_data_dict: load_shap_results 返回的字典，包含 {"explainer", "shap_values", "X"}
-    save_dir: 图片保存的文件夹路径
+    Parameters:
+    shap_data_dict: Dictionary returned by load_shap_results, containing {"explainer", "shap_values", "X"}
+    save_dir: Directory path to save plots
     """
-    # 1. 创建保存目录
+    # 1. Create save directory
     os.makedirs(save_dir, exist_ok=True)
     
-    # 2. 解包数据
+    # 2. Unpack data
     shap_values = shap_data_dict["shap_values"]
     X = shap_data_dict["X"]
-    explainer = shap_data_dict["explainer"]  # 取出解释器对象
+    explainer = shap_data_dict["explainer"]  # Extract explainer object
     
-    # --- 数据预处理 ---
+    # --- Data preprocessing ---
     
-    # 处理分类模型：如果 shap_values 是 list，取正类 (index 1) 或第 0 个
+    # Handle classification model: if shap_values is a list, take positive class (index 1) or first one
     if isinstance(shap_values, list):
         shap_values = shap_values[1] if len(shap_values) > 1 else shap_values[0]
 
-    # 关键步骤：从 explainer 中提取 base_value (基准值)
+    # Key step: extract base_value from explainer
     base_value = 0
     if hasattr(explainer, "expected_value"):
         val = explainer.expected_value
-        # 如果是数组（只有一个数），取出来转成标量
+        # If it's an array (single value), extract and convert to scalar
         if isinstance(val, (np.ndarray, list)):
              if np.size(val) == 1:
                  base_value = val.item()
              else:
-                 # 多分类情况，取对应类别的基准值(这里简单取第一个)
+                 # Multi-class case, take base value for corresponding class (here simply take first one)
                  base_value = val[0]
         else:
              base_value = val
 
-    # ---------------------------------------------------------
-    # 🔥 核心：构建 shap.Explanation 对象
-    # ---------------------------------------------------------
-    # 这是为了满足 shap.plots.waterfall 等新版绘图函数的严格要求
+
+    # Create SHAP Explanation object for plotting
     explanation = shap.Explanation(
         values=shap_values,
         base_values=base_value,
@@ -53,35 +51,35 @@ def plot_all_shap_charts(shap_data_dict, save_dir="shap_plots"):
     )
     # ---------------------------------------------------------
 
-    print(f"--- [GeoVisXRD] 正在生成图表，保存至: {save_dir}/ ---")
+    print(f"INFO: [GeoVisXRD] Generating plots, saving to: {save_dir}/ ")
 
-    # --- 图表 1: 蜂群图 (Summary Dot) ---
-    # 展示特征对预测值的影响方向和强度
-    print("1. 正在绘制：蜂群图 (Summary Dot)...")
+    # --- Chart 1: Swarm Plot (Summary Dot) ---
+    # Display the direction and magnitude of feature impact on predictions
+    print("INFO: 1. Plotting: Swarm Plot (Summary Dot)...")
     plt.figure()
     shap.summary_plot(shap_values, X, show=False)
     plt.savefig(os.path.join(save_dir, "shap_summary_dot.png"), bbox_inches='tight', dpi=300)
     plt.close()
 
-    # --- 图表 2: 柱状图 (Summary Bar) ---
-    # 展示特征重要性排名
-    print("2. 正在绘制：重要性柱状图 (Summary Bar)...")
+    # --- Chart 2: Bar Plot (Summary Bar) ---
+    # Display feature importance ranking
+    print("INFO: 2. Plotting: Importance Bar Chart (Summary Bar)...")
     plt.figure()
     shap.summary_plot(shap_values, X, plot_type="bar", show=False)
     plt.savefig(os.path.join(save_dir, "shap_summary_bar.png"), bbox_inches='tight', dpi=300)
     plt.close()
 
-    # --- 图表 3: 瀑布图 (Waterfall) ---
-    # 展示单条样本的决策过程。这里默认画第 0 条数据作为示例。
-    print("3. 正在绘制：单样本瀑布图 (Waterfall - Sample 0)...")
+    # --- Chart 3: Waterfall Plot ---
+    # Display the decision process of a single sample. Here we plot sample 0 as an example by default.
+    print("INFO: 3. Plotting: Single Sample Waterfall Plot (Waterfall - Sample 0)...")
     try:
         plt.figure()
-        # explanation[0] 会自动切片，保留 explanation 对象的属性
+        # explanation[0] will automatically slice while preserving explanation object attributes
         shap.plots.waterfall(explanation[0], show=False)
         plt.savefig(os.path.join(save_dir, "shap_waterfall_sample0.png"), bbox_inches='tight', dpi=300)
         plt.close()
     except Exception as e:
-        print(f"⚠️ 瀑布图绘制失败 (可能是版本兼容性问题): {e}")
+        print(f"ERROR: [GeoVisXRD] Waterfall plot generation failed (possible version compatibility issue): {e}")
         plt.close()
 
-    print(f"✅ 所有图表生成完毕！")
+    print(f"SUCCESS: [GeoVisXRD] All plots generated successfully!")

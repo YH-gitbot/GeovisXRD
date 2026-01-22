@@ -5,48 +5,43 @@ import matplotlib.pyplot as plt
 import shap
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
-# 全局字体设置
+# Global font settings
 plt.rcParams.update({'font.size': 12})
 
 # =========================================================
-# 1. Summary Bar Plot (总体重要性柱状图)
+# 1. Summary Bar Plot (Overall Importance Bar Chart)
 # =========================================================
 def plot_summary_bar(shap_values, feature_names, save_path=None, **kwargs):
     """
-    绘制 SHAP 重要性柱状图。
-    **kwargs: 传递给 shap.summary_plot 的其他参数 (例如 max_display=10)
+    Plot SHAP importance bar chart.
+    **kwargs: additional parameters passed to shap.summary_plot (e.g., max_display=10)
     """
-    print(f"绘制 Summary Bar ({save_path if save_path else '显示'})...")
-    
-    # 创建新画布，避免和之前的冲突
+    print(f"INFO: Plotting Summary Bar ({save_path if save_path else 'display'})...")
     plt.figure()
-    
-    # 核心绘图
     shap.summary_plot(shap_values, feature_names=feature_names, plot_type="bar", show=False, **kwargs)
+     
+    fig = plt.gcf()  
     
-    fig = plt.gcf() # 获取当前图表对象
-    
-    # 如果有保存路径，则保存；否则只返回对象供后续修改
+    # Save if path provided; otherwise return object for further modification
     if save_path:
         fig.savefig(save_path, dpi=600, bbox_inches='tight')
-        plt.close() # 如果保存了就关闭，释放内存
+        plt.close()  # Close to release memory
     
     return fig
 
-
 # =========================================================
-# 2. Beeswarm Plot (蜂群图)
+# 2. Beeswarm Plot
 # =========================================================
 def plot_beeswarm(shap_values, X, feature_names=None, save_path=None, **kwargs):
     """
-    绘制 SHAP 蜂群图。
+    Plot SHAP beeswarm plot.
     """
-    print(f"绘制 Beeswarm ({save_path if save_path else '显示'})...")
+    print(f"INFO: Plotting Beeswarm ({save_path if save_path else 'display'})...")
     
     if feature_names is None:
         feature_names = X.columns if hasattr(X, "columns") else [f"F{i}" for i in range(X.shape[1])]
 
-    # 构造 Explanation 对象
+    # Construct Explanation object
     explanation = shap.Explanation(
         values=shap_values,
         base_values=np.mean(shap_values), 
@@ -56,7 +51,7 @@ def plot_beeswarm(shap_values, X, feature_names=None, save_path=None, **kwargs):
 
     plt.figure(figsize=(10, 8))
     
-    # 传递 kwargs 给 shap.plots.beeswarm (比如 max_display=20)
+    # Pass kwargs to shap.plots.beeswarm (e.g., max_display=20)
     shap.plots.beeswarm(explanation, show=False, **kwargs)
     
     fig = plt.gcf()
@@ -72,40 +67,40 @@ def plot_beeswarm(shap_values, X, feature_names=None, save_path=None, **kwargs):
 # 3. Dependence Plot 
 # =========================================================
 def plot_dependence_2d_lowess(shap_values, X, 
-                              x_feature,           # 【维度1】X轴 (特征数值)
-                              y_feature=None,      # 【维度2】Y轴 (SHAP值) - 不填默认等于 x_feature
+                              x_feature,           # [Dimension 1] X-axis (feature values)
+                              y_feature=None,      # [Dimension 2] Y-axis (SHAP values) - defaults to x_feature
                               xlim=None, ylim=None, save_path=None, 
                               lower=0.01, upper=0.99):
     """
-    2D 依赖图 + 红线 (Lowess) + 去除离群值
-    支持 X轴 和 Y轴(SHAP) 自由组合。
+    2D dependence plot + red line (Lowess) + outlier removal
+    Supports free combination of X and Y (SHAP) axes.
     """
-    # 1. 默认 Y轴 = X轴 (标准依赖图)
+    # 1. Default Y-axis = X-axis (standard dependence plot)
     if y_feature is None:
         y_feature = x_feature
         
-    print(f"绘制 2D Lowess: X={x_feature}, Y=SHAP({y_feature}) ...")
+    print(f"INFO: Plotting 2D Lowess: X={x_feature}, Y=SHAP({y_feature}) ...")
     
-    # 2. 获取数据
+    # 2. Get data
     if isinstance(X, pd.DataFrame):
         try:
-            # 获取 X轴数据 (Raw Value)
+            # Get X-axis data (Raw Value)
             x_data = X[x_feature].values
-            # 获取 Y轴数据 (SHAP Value)
+            # Get Y-axis data (SHAP Value)
             col_idx_y = X.columns.get_loc(y_feature)
             y_shap = shap_values[:, col_idx_y]
         except KeyError as e:
-            print(f"❌ 找不到特征: {e}")
+            print(f"ERROR: Feature not found: {e}")
             return
     else:
-        # Numpy 索引模式
+        # NumPy indexing mode
         x_data = X[:, int(x_feature)]
         y_shap = shap_values[:, int(y_feature)]
-        # 更新显示用的名字
+        # Update display names
         x_feature = f"Feature {x_feature}"
         y_feature = f"Feature {y_feature}"
 
-    # 3. 去除离群值 (只针对 X轴 过滤，Y轴跟随)
+    # 3. Remove outliers (filter X-axis only, Y follows)
     q_low = np.quantile(x_data, lower)
     q_high = np.quantile(x_data, upper)
     mask = (x_data >= q_low) & (x_data <= q_high)
@@ -113,31 +108,31 @@ def plot_dependence_2d_lowess(shap_values, X,
     x_clean = x_data[mask]
     y_clean = y_shap[mask]
 
-    # 4. 绘图
+    # 4. Plotting
     fig, ax = plt.subplots(dpi=150, figsize=(6, 4))
     
-    # 0基准线
+    # Zero baseline
     ax.axhline(0, linestyle='--', color='black')
     
-    # 蓝色散点
+    # Blue scatter points
     ax.scatter(x_clean, y_clean, c="#2196F3", s=12, edgecolors="white", lw=0.3, alpha=0.7)
     
-    # 红色平滑线 (Lowess)
+    # Red smoothing line (Lowess)
     try:
         smoothed = lowess(y_clean, x_clean, frac=0.25, return_sorted=True)
         ax.plot(smoothed[:, 0], smoothed[:, 1], color="red", lw=2, label='Trend')
     except Exception as e:
-        print(f"⚠️ Lowess 计算失败: {e}")
+        print(f"WARNING: Lowess calculation failed: {e}")
 
-    # 坐标轴限制
+    # Axis limits
     if ylim: ax.set_ylim(ylim)
     if xlim: ax.set_xlim(xlim)
     
-    # 自动生成标签
+    # Auto-generate labels
     ax.set_xlabel(str(x_feature))
     ax.set_ylabel(f"SHAP value for\n{y_feature}")
     
-    # 标题 (如果 X 和 Y 不同，标出来)
+    # Title (show if X and Y differ)
     if x_feature != y_feature:
         ax.set_title(f"Cross-Dependence: {x_feature} vs SHAP({y_feature})", fontsize=10)
     
@@ -146,60 +141,59 @@ def plot_dependence_2d_lowess(shap_values, X,
     if save_path:
         plt.savefig(save_path, format='png', dpi=300, bbox_inches='tight')
         plt.close()
-        print(f"   - 已保存: {save_path}")
+        print(f"   - Saved: {save_path}")
     else:
         return fig
 
 
 def plot_dependence_3d_interaction(shap_values, X, 
-                                   x_feature,               # 【维度1】X轴: 特征数值
-                                   y_feature=None,          # 【维度2】Y轴: SHAP值 (不填默认=x_feature)
-                                   interaction_feature=None,# 【维度3】颜色: 特征数值
+                                   x_feature,               # [Dimension 1] X-axis: feature values
+                                   y_feature=None,          # [Dimension 2] Y-axis: SHAP values (defaults to x_feature)
+                                   interaction_feature=None,# [Dimension 3] Color: feature values
                                    xlim=None, ylim=None, save_path=None):
     """
-    3D 依赖图 + 颜色交互
-    X, Y, Color 三个维度完全独立。
+    3D dependence plot + color interaction
+    X, Y, Color are completely independent dimensions.
     """
-    # 1. 默认 Y轴 = X轴
+    # 1. Default Y-axis = X-axis
     if y_feature is None:
         y_feature = x_feature
 
-    print(f"绘制 3D Interaction: X={x_feature}, Y=SHAP({y_feature}), Color={interaction_feature} ...")
+    print(f"INFO: Plotting 3D Interaction: X={x_feature}, Y=SHAP({y_feature}), Color={interaction_feature} ...")
     
-    # 2. 获取数据
+    # 2. Get data
     try:
         if isinstance(X, pd.DataFrame):
-            # X轴数据
+            # X-axis data
             x_data = X[x_feature].values
-            # Y轴数据 (SHAP)
+            # Y-axis data (SHAP)
             col_idx_y = X.columns.get_loc(y_feature)
             y_data = shap_values[:, col_idx_y]
-            # 颜色数据
+            # Color data
             if interaction_feature:
                 c_data = X[interaction_feature].values
             else:
                 c_data = None
         else:
-            # Numpy 模式
+            # NumPy mode
             x_data = X[:, int(x_feature)]
             y_data = shap_values[:, int(y_feature)]
             c_data = X[:, int(interaction_feature)] if interaction_feature else None
-            # 更新名字
+            # Update names
             x_feature = f"Feature {x_feature}"
             y_feature = f"Feature {y_feature}"
             if interaction_feature: interaction_feature = f"Feature {interaction_feature}"
 
     except KeyError as e:
-        print(f"❌ 特征名错误: {e}")
+        print(f"ERROR: Invalid feature name: {e}")
         return
 
-    # 3. 绘图
+    # 3. Plotting
     fig, ax = plt.subplots(dpi=150, figsize=(6, 4))
     
-    # 绘制散点
+    # Plot scatter points
     if c_data is not None:
-        # 有颜色交互：使用 coolwarm 配色 (SHAP 默认风格)
-        
+        # With color interaction: use red_blue colormap (SHAP default style)
         vmin = np.nanpercentile(c_data, 1)
         vmax = np.nanpercentile(c_data, 99)
         
@@ -207,15 +201,15 @@ def plot_dependence_3d_interaction(shap_values, X,
                              cmap=shap.plots.colors.red_blue,
                              vmin=vmin, vmax=vmax, 
                              s=12, edgecolors="white", lw=0.3, alpha=1.0)
-        # 添加颜色条
+        # Add colorbar
         cbar = plt.colorbar(scatter, ax=ax)
         cbar.set_label(interaction_feature, fontsize=10)
     else:
-        # 无颜色交互：默认蓝色
+        # No color interaction: default blue
         ax.scatter(x_data, y_data, c="#2196F3", 
                    s=12, edgecolors="white", lw=0.3, alpha=0.7)
 
-    # 4. 装饰
+    # 4. Decoration
     ax.axhline(0, linestyle='--', color='black')
     
     if ylim: ax.set_ylim(ylim)
@@ -224,7 +218,7 @@ def plot_dependence_3d_interaction(shap_values, X,
     ax.set_xlabel(str(x_feature))
     ax.set_ylabel(f"SHAP value for\n{y_feature}")
     
-    # 标题
+    # Title
     title = f"Dependence: {x_feature}"
     if x_feature != y_feature:
         title += f" (SHAP: {y_feature})"
@@ -235,7 +229,7 @@ def plot_dependence_3d_interaction(shap_values, X,
     if save_path:
         plt.savefig(save_path, format='png', dpi=300, bbox_inches='tight')
         plt.close()
-        print(f"- 已保存: {save_path}")
+        print(f"INFO: Saved: {save_path}")
     else:
         return fig
 
@@ -245,11 +239,11 @@ def plot_dependence_3d_interaction(shap_values, X,
 # =========================================================
 def plot_pos_neg_ratio(shap_values, feature_names, save_path=None, color_palette=None):
     """
-    绘制正负贡献比例图
+    Plot positive/negative contribution ratio chart
     """
-    print(f"绘制 Ratio Plot ({save_path if save_path else '显示'})...")
+    print(f"INFO: Plotting Ratio Plot ({save_path if save_path else 'display'})...")
     
-    # 数据处理
+    # Data processing
     shap_df = pd.DataFrame(shap_values, columns=feature_names)
     pos_neg_ratios = {}
 
@@ -286,23 +280,20 @@ def plot_pos_neg_ratio(shap_values, feature_names, save_path=None, color_palette
     return ax
 
 # =========================================================
-# 5. causal plotting utils
+# 5. Causal plotting utils
 # =========================================================
 import networkx as nx
-
-import networkx as nx
-import matplotlib.pyplot as plt
-import os
 
 def plot_causal_graph_networkx(nx_graph, threshold=0.0, title="Causal Graph", 
                                save_path=None, show=False):
     """
-    绘制因果图。
-    新增参数: show (bool) - 是否弹出窗口显示图片。批量运行时建议设为 False。
+    Plot causal graph.
+    New parameter: show (bool) - whether to display the plot window. 
+    Recommended to set to False for batch processing.
     """
-    print(f"🎨 正在绘制因果图 (Threshold={threshold})...")
+    print(f"INFO: Plotting causal graph (Threshold={threshold})...")
     
-    # 1. 过滤弱边
+    # 1. Filter weak edges
     filtered_edges = []
     for u, v, d in nx_graph.edges(data=True):
         weight = d.get('weight', 0)
@@ -313,7 +304,7 @@ def plot_causal_graph_networkx(nx_graph, threshold=0.0, title="Causal Graph",
     filtered_graph.add_nodes_from(nx_graph.nodes())
     filtered_graph.add_weighted_edges_from(filtered_edges)
 
-    # 2. 绘图
+    # 2. Plotting
     plt.figure(figsize=(12, 8))
     pos = nx.spring_layout(filtered_graph, seed=42)
     
@@ -337,20 +328,18 @@ def plot_causal_graph_networkx(nx_graph, threshold=0.0, title="Causal Graph",
 
     plt.title(f"{title} (Threshold={threshold})")
     
-    # 3. 保存
+    # 3. Save
     if save_path:
         directory = os.path.dirname(save_path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
             
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"   - 图片已保存: {save_path}")
+        print(f"INFO: Plot saved: {save_path}")
         
-    # 🔥 关键修改在这里！
     if show:
-        plt.show()  # 阻塞，等待用户关闭
+        plt.show()  # Blocking, wait for user to close
     else:
-        plt.close() # 不阻塞，直接释放内存，继续跑下一行代码
+        plt.close()  # Non-blocking, release memory and continue
     
     return filtered_edges
-

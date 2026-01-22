@@ -11,9 +11,6 @@ def train_model(
     return_metrics=True,
     **model_params
 ):
-    """
-    根据指定模型训练并返回模型与评估结果
-    """
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
