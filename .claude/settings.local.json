@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/shumouren/miniconda3/envs/camp/bin/python:*)"
+    ]
+  }
+}

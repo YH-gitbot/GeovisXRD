@@ -1,20 +1,26 @@
-# src/geovisxrd/save.py
+# src/geovisxrd/modeling/save.py
 
 import os
 import joblib
 from datetime import datetime
 
+from .._logging import get_logger
+logger = get_logger(__name__)
+
 
 def save_model(model, model_name: str, save_dir: str = "models"):
-    '''
-    Save the trained model to disk with a timestamped filename.
-    Args:
-        model: Trained model instance
-        model_name (str): Name of the model
-        save_dir (str): Directory to save the model files
-    Returns:
-        filepath (str): Path to the saved model file
-    '''
+    """Save a trained model to disk with a timestamped filename.
+
+    Parameters
+    ----------
+    model      : trained model instance
+    model_name : str — short name used in the filename (e.g. 'xgb')
+    save_dir   : str — output directory (created if absent)
+
+    Returns
+    -------
+    str : absolute path to the saved .pkl file
+    """
     os.makedirs(save_dir, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -24,5 +30,5 @@ def save_model(model, model_name: str, save_dir: str = "models"):
 
     joblib.dump(model, filepath)
 
-    print(f"Save {filename} to {filepath}")
+    logger.info(f"Model saved to: {filepath}")
     return filepath

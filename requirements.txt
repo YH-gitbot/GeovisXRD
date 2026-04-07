@@ -1,0 +1,12 @@
+# requirements.txt — development reference only.
+#
+# pyproject.toml is the authoritative source for all dependencies.
+# Do not add packages here; edit pyproject.toml instead.
+#
+# Install the full environment (all runtime deps + dev tools):
+#
+#   pip install -e ".[dev]"
+#
+# To generate a reproducible lockfile of the current environment:
+#
+#   pip freeze > requirements-lock.txt

@@ -1,0 +1,51 @@
+I want to introduce a top-level pipeline package to make the library easier to use without collapsing the low-level module boundaries.
+
+Please refactor toward this architecture:
+
+src/geovisxrd/
+  modeling/
+  explaining/
+  plotting/
+  export/
+  causal/
+  threshold/
+  pipeline/
+    __init__.py
+    analysis.py
+    recursive.py
+
+Goals:
+1. Keep low-level modules separate:
+   - modeling = train / evaluate / save model
+   - explaining = compute SHAP / save-load SHAP bundle
+   - plotting = all visualization, including mapping
+   - export = standardized result tables / GIS-ready export
+   - causal and threshold remain separate specialized modules
+
+2. Add a new pipeline layer as the orchestration layer:
+   - pipeline/analysis.py should provide a smooth end-to-end standard analysis workflow
+   - pipeline/recursive.py should provide the recursive workflow
+   - pipeline should call existing modules rather than reimplementing their logic
+
+3. Move recursive workflow into pipeline/recursive.py rather than keeping a separate recursive package with its own pipeline.py.
+   Recursive analysis is also a workflow, so it belongs naturally inside pipeline/.
+
+4. The standard analysis pipeline should combine modeling + explaining smoothly, for example:
+   - train model
+   - evaluate
+   - predict
+   - compute SHAP
+   - save model
+   - save SHAP results
+   - optionally export geo tables
+   - optionally generate plots
+
+5. Do not physically merge modeling and explaining into one low-level module.
+   Instead, integrate them at the pipeline level.
+
+6. Keep plotting as the single home of all visualization, including mapping.
+
+7. Refactor with minimal unnecessary changes.
+   Focus on architecture, imports, orchestration, and clear module boundaries.
+
+Please first explain the refactor plan, then show the file-level changes, then provide the updated code.

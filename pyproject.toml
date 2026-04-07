@@ -5,62 +5,62 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geovisxrd"
-version = "0.5.0"
+version = "1.0.0"
 description = "GeoVisXRD: An Open-Source Python Library for Geospatial Shapley Value Computation and Visualization"
-
-
-readme = "README.md" 
-
-
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
 authors = [
   { name = "Yuanhan Shu", email = "yuanhan.shu@tum.de" },
 ]
-
-
-license = { text = "MIT" }
-
-
 classifiers = [
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
-
 
 dependencies = [
-    "numpy",
-    "pandas",
-    "tqdm",
-    "scipy",
-    "shap",
-    "joblib",
-    "xgboost<3.0.0",
-    "scikit-learn",
-    "lightgbm",
-    "matplotlib",
-
-    "statsmodels", ## 2D lowess smoothing
-
-    ## causal discovery v0.5.0
-    "networkx",       # Graph structure foundation
-    "torch",          # Deep learning foundation (needed for SAM, NOTEARS)
-    "causal-learn",   # PC algorithm
-    "lingam",         # LiNGAM algorithm
-    "causalnex",      # NOTEARS algorithm
-    "cdt",
+    # Numerics and data
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scipy>=1.9",
+    # Modelling
+    "scikit-learn>=1.1,<1.7",
+    "xgboost>=1.7,<3.0.0",
+    "lightgbm>=3.3",
+    # Explainability
+    "shap>=0.41",
+    "joblib>=1.2",
+    # Causal discovery
+    "torch>=2.0",
+    "causal-learn>=0.1.3",
+    "lingam>=1.7",
+    "causalnex>=0.12",
+    "cdt>=0.6",
+    # Visualisation and graph utilities
+    "matplotlib>=3.5",
+    "statsmodels>=0.13",
+    "networkx>=2.8",
+    # Geospatial — export and mapping (rasterio required for GeoTIFF basemaps)
+    "geopandas>=0.13",
+    "shapely>=2.0",
+    "rasterio>=1.3",
+    # Utilities
+    "tqdm>=4.60",
 ]
 
-# Python version requirement
-requires-python = ">=3.8"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
 
 
-# # 3. 项目链接：替代 url
-# [project.urls]
-# Homepage = "https://github.com/Ziqi-Li/geoshapley"
-# Repository = "https://github.com/Ziqi-Li/geoshapley"
+[tool.setuptools.packages.find]
+where = ["src"]
 
 
-# # 4. 命令行脚本：替代 entry_points
-# [project.scripts]
-# geovisxrd = "geovisxrd.__main__:main"
+[tool.pytest.ini_options]
+testpaths = ["tests"]
