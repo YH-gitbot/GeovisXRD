@@ -1,8 +1,10 @@
 # GeoVisXRD
 
-**Geovisual Explainable AI for Causal Discovery**
+**GeoVisXRD** is an open-source Python framework for reusable geospatial explainable AI workflows. It integrates predictive modelling, SHAP-based explanation, geospatial visualization, exploratory causal discovery, threshold stability analysis, and recursive decomposition into a unified workflow.
 
-GeoVisXRD is a specialized Python framework for Recursive Spatial Causal Inference and Non-linear Driver Analysis. It bridges the gap between predictive performance and causal mechanism understanding in complex geospatial systems, such as soil organic carbon (SOC) distribution and frozen ground dynamics.
+The package has been evaluated on selected case studies, including housing value prediction, air-quality modelling, and transportation-demand analysis. These case studies are used to demonstrate and validate the workflow, but GeoVisXRD is not designed to be limited to these specific datasets. In principle, it can be applied to coordinate-based geospatial prediction tasks where the input data include geographic coordinates, explanatory variables, and a prediction target.
+
+GeoVisXRD is especially suitable for tabular spatial datasets with latitude/longitude coordinates or other point-based spatial coordinates that can be exported and visualized geographically. For polygon, raster, network, or highly domain-specific spatial data, additional preprocessing may be required before using the package.
 
 ## Core Features
 
